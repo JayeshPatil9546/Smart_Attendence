@@ -206,10 +206,10 @@ class Student:
         update_button = Button(button_frame, text="Update", width=17 ,font=("times new roman", 11, "bold"), bg="gray", fg="white",command=self.update_data)
         update_button.grid(row=0, column=1, padx=5,  sticky=W)
         # Delete button
-        delete_button = Button(button_frame, text="Delete", width=17 ,font=("times new roman", 11, "bold"), bg="gray", fg="white")
+        delete_button = Button(button_frame, text="Delete", width=17 ,font=("times new roman", 11, "bold"), bg="gray", fg="white",command=self.delete_data)
         delete_button.grid(row=0, column=2, padx=5,  sticky=W)
         # Reset button
-        reset_button = Button(button_frame, text="Reset", width=17 ,font=("times new roman", 11, "bold"), bg="gray", fg="white")
+        reset_button = Button(button_frame, text="Reset", width=17 ,font=("times new roman", 11, "bold"), bg="gray", fg="white",command=self.reset_data)
         reset_button.grid(row=0, column=3, padx=5, sticky=W)
 
         # buttons frame
@@ -429,7 +429,43 @@ class Student:
                 conn.close()
             except Exception as e:
                 messagebox.showerror("Error", f"Error due to {str(e)}", parent=self.root)
+
+
+    #delete data function
+    def delete_data(self):
+        if self.var_student_id.get() == "":
+            messagebox.showerror("Error", "Student ID must be required", parent=self.root)
+        else:
+            try:
+                delete = messagebox.askyesno("Delete", "Do you want to delete this student details?", parent=self.root)
+                if delete > 0:
+                    conn = mysql.connector.connect(host="localhost", user="root", password="Jayesh@24", database="face_detection")
+                    cursor = conn.cursor()
+                    cursor.execute("DELETE FROM student_info WHERE student_id=%s", (self.var_student_id.get(),))
+                    conn.commit()
+                    self.fatch_data()  # Refresh the table after deleting data
+                    conn.close()
+                    messagebox.showinfo("Success", "Student details deleted successfully", parent=self.root)
+            except Exception as e:
+                messagebox.showerror("Error", f"Error due to {str(e)}", parent=self.root)
             
+    #reset function
+    def reset_data(self):
+        self.var_department.set("Select Department")
+        self.var_course.set("Select Course")
+        self.var_year.set("Select Year")
+        self.var_semester.set("Select Semester")
+        self.var_student_id.set("")
+        self.var_student_name.set("")
+        self.var_class_division.set("Select Division")
+        self.var_roll_no.set("")
+        self.var_phone_no.set("")
+        self.var_email.set("")
+        self.var_address.set("")
+        self.var_teacher_name.set("")
+        self.var_birth_date.set("")
+        self.var_gender.set("Select Gender")
+        self.var_radio.set("")
 
 
 
