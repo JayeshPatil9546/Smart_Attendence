@@ -318,12 +318,12 @@ class Student:
             try:
             # Connect to the database
                 conn = mysql.connector.connect(host="localhost", user="root", password="Jayesh@24", database="face_detection")
-                cursor = conn.cursor()  #update query plz .....................
+                cursor = conn.cursor()  
                 cursor.execute("""
                     INSERT INTO student_info (
                         department, course, year, semester, student_id,
                         student_name, class_division, roll_no, phone_no,
-                        email, address, teacher_name, birth_date, gender, photo_sampl           
+                        email, address, teacher_name, birth_date, gender, photo_sample           
                     )                                                      
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
@@ -403,7 +403,7 @@ class Student:
                         department=%s, course=%s, year=%s, semester=%s,
                         student_name=%s, class_division=%s, roll_no=%s,
                         phone_no=%s, email=%s, address=%s,
-                        teacher_name=%s, birth_date=%s , gender=%s, photo_sampl=%s where student_id=%s """, ( # update query plz .....................
+                        teacher_name=%s, birth_date=%s , gender=%s, photo_sample=%s where student_id=%s """, ( 
                         self.var_department.get(),
                         self.var_course.get(),
                         self.var_year.get(),
