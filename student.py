@@ -3,6 +3,8 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import messagebox
 import mysql.connector
+import cv2
+
 
 class Student:
     def __init__(self, root):
@@ -217,7 +219,7 @@ class Student:
         button_frame1.place(x=4, y=280, width=730, height= 30)
 
         # Take Photo button
-        take_photo_button = Button(button_frame1, text="Take Photo Sample", width=36, font=("times new roman", 11, "bold"), bg="gray", fg="white")
+        take_photo_button = Button(button_frame1, text="Take Photo Sample", width=36, font=("times new roman", 11, "bold"), bg="gray", fg="white",command=self.generate_dataset)
         take_photo_button.grid(row=0, column=0, padx=5, sticky=W)
         # Update Photo button
         update_photo_button = Button(button_frame1, text="Update Photo Sample", width=36, font=("times new roman", 11, "bold"), bg="gray", fg="white")
@@ -467,8 +469,80 @@ class Student:
         self.var_gender.set("Select Gender")
         self.var_radio.set("")
 
+    # Function to take photo sample
+    def generate_dataset(self):
+        if self.var_department.get() == "Select Department" or self.var_course.get() == "Select Course" or self.var_year.get() == "Select Year" or self.var_semester.get() == "Select Semester":
+            messagebox.showerror("Error", "All fields are required")
+        else:
+            try:
+                conn = mysql.connector.connect(host="localhost", user="root", password="Jayesh@24", database="face_detection")
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM student_info ")
+                myresult = cursor.fetchall()
+                id = 0
+                for x in myresult:
+                    id += 1
+                cursor.execute("""
+                    UPDATE student_info SET
+                        department=%s, course=%s, year=%s, semester=%s,
+                        student_name=%s, class_division=%s, roll_no=%s,
+                        phone_no=%s, email=%s, address=%s,
+                        teacher_name=%s, birth_date=%s , gender=%s, photo_sample=%s where student_id=%s """, ( 
+                        self.var_department.get(),
+                        self.var_course.get(),
+                        self.var_year.get(),
+                        self.var_semester.get(),
+                        self.var_student_name.get(),
+                        self.var_class_division.get(),
+                        self.var_roll_no.get(),
+                        self.var_phone_no.get(),
+                        self.var_email.get(),
+                        self.var_address.get(),
+                        self.var_teacher_name.get(),
+                        self.var_birth_date.get(),
+                        self.var_gender.get(),
+                        self.var_radio.get(),
+                        self.var_student_id.get()==id+1
+                        ))
+                conn.commit()
+                self.fatch_data()  # Refresh the table after updating data
+                self.reset_data()  # Reset the form after saving
+                conn.close()
 
+                # lode predefine data on face frontal from openCV
+                face_classifire=cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
+                def face_cropped(img):
+                    gray=cv2.cvtColor(img,cv2.COLOR_BGR2BGRA)
+                    face=face_classifire.detectMultiScale(gray,1.3,5)
+                    #scling factor=1.3
+                    #Minimum neighbor=5
+
+                    for (x,y,w,h) in face:
+                        face_cropped=img[y:y+h,x:x+w]
+                        return face_cropped
+                    return None
+                
+                cap=cv2.VideoCapture(0)  # Open the webcam
+                img_id = 0
+                while True:
+                    ret, frame = cap.read()  # Read a frame from the webcam
+                    if face_cropped(frame) is not None:
+                        img_id+=1
+                    face=cv2.resize(face_cropped(frame),(450,450))
+                    face=cv2.cvtColor(face,cv2.COLOR_BGR2GRAY)
+                    file_name_path = "data/user." + str(id) + "." + str(img_id) + ".jpg"
+                    cv2.imwrite(file_name_path, face)
+                    cv2.putText(face, str(img_id), (50, 50), cv2.FONT_HERSHEY_COMPLEX, 2, (0, 255, 0), 2)
+                    cv2.imshow("Cropped Face", face)
+
+                    if cv2.waitKey(1) == 13 or int(img_id) == 100:  # Press Enter to stop capturing
+                        break
+                cap.release()  # Release the webcam
+                cv2.destroyAllWindows()
+                messagebox.showinfo("Result","Genereting data set completed !! ")
+            except Exception as e:
+                messagebox.showerror("Error", f"Error due to {str(e)}", parent=self.root)
 
 
 if __name__ == "__main__":

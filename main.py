@@ -1,6 +1,7 @@
 from tkinter import *
 from PIL import Image, ImageTk
 from student import Student
+import os
 
 class Face_Recognition_system:
     def __init__(self, root):
@@ -96,10 +97,10 @@ class Face_Recognition_system:
         img8 = img8.resize((220, 220), Image.Resampling.LANCZOS)
         self.photoimg8 = ImageTk.PhotoImage(img8)
 
-        b6 = Button(bg_img, image=self.photoimg8, cursor="hand2")
+        b6 = Button(bg_img, image=self.photoimg8, cursor="hand2",command=self.open_img)
         b6.place(x=500, y=400, width=220, height=220)
 
-        b6_1 = Button(bg_img, text="Photos", cursor="hand2", font=("times new roman", 15, "bold"), bg="black", fg="white")
+        b6_1 = Button(bg_img, text="Photos", cursor="hand2",command=self.open_img, font=("times new roman", 15, "bold"), bg="black", fg="white")
         b6_1.place(x=500, y=620, width=220, height=40)
 
         # Developer Button
@@ -114,7 +115,7 @@ class Face_Recognition_system:
         b7_1.place(x=800, y=620, width=220, height=40)
 
         # Exit Button
-        img10 = Image.open("C:/attendence/college_image/exit.jpeg")
+        img10 = Image.open("college_image/exit.jpeg")
         img10 = img10.resize((220, 220), Image.Resampling.LANCZOS)
         self.photoimg10 = ImageTk.PhotoImage(img10)
 
@@ -123,6 +124,12 @@ class Face_Recognition_system:
 
         b8_1 = Button(bg_img, text="Exit", cursor="hand2", font=("times new roman", 15, "bold"), bg="black", fg="white", command=root.destroy)
         b8_1.place(x=1100, y=620, width=220, height=40)
+
+
+    # function to open image window
+    def open_img(self):
+        os.startfile("data")
+
 
         # functionality for buttons
     def student_details(self):
