@@ -1,7 +1,10 @@
 from tkinter import *
 from PIL import Image, ImageTk
 from student import Student
+from train import Train
+from face_detector import Face_Recognition
 import os
+
 
 class Face_Recognition_system:
     def __init__(self, root):
@@ -53,10 +56,10 @@ class Face_Recognition_system:
         img4 = img4.resize((220, 220), Image.Resampling.LANCZOS)
         self.photoimg4 = ImageTk.PhotoImage(img4)
 
-        b2 = Button(bg_img, image=self.photoimg4, cursor="hand2") 
+        b2 = Button(bg_img, image=self.photoimg4, cursor="hand2", command=self.face_recognition) 
         b2.place(x=500, y=100, width=220, height=220)
 
-        b2_1 = Button(bg_img, text="Face Detector", cursor="hand2", font=("times new roman", 15, "bold"), bg="black", fg="white")
+        b2_1 = Button(bg_img, text="Face Detector", cursor="hand2", font=("times new roman", 15, "bold"), bg="black", fg="white", command=self.face_recognition)
         b2_1.place(x=500, y=320, width=220, height=40)
 
         # Attendance Button
@@ -86,10 +89,10 @@ class Face_Recognition_system:
         img7 = img7.resize((220, 220), Image.Resampling.LANCZOS)
         self.photoimg7 = ImageTk.PhotoImage(img7)
 
-        b5 = Button(bg_img, image=self.photoimg7, cursor="hand2")
+        b5 = Button(bg_img, image=self.photoimg7, cursor="hand2",command=self.train_data)
         b5.place(x=200, y=400, width=220, height=220)
 
-        b5_1 = Button(bg_img, text="Train Data", cursor="hand2", font=("times new roman", 15, "bold"), bg="black", fg="white")
+        b5_1 = Button(bg_img, text="Train Data", cursor="hand2", font=("times new roman", 15, "bold"), bg="black", fg="white",command=self.train_data)
         b5_1.place(x=200, y=620, width=220, height=40)
 
         # Photos Button
@@ -135,7 +138,16 @@ class Face_Recognition_system:
     def student_details(self):
         self.new_window = Toplevel(self.root)
         self.app = Student(self.new_window)
+
+    #function to train the model
+    def train_data(self):
+        self.new_window = Toplevel(self.root)
+        self.app = Train(self.new_window)
             
+    #function to open face recognition window
+    def face_recognition(self):
+        self.new_window = Toplevel(self.root)
+        self.app = Face_Recognition(self.new_window)
 
 
     
