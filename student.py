@@ -509,41 +509,45 @@ class Student:
                 self.reset_data()  # Reset the form after saving
                 conn.close()
 
-                # lode predefine data on face frontal from openCV
-                face_classifire=cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+                # Load prebuilt model for Frontal Face
+                face_classifier = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
                 def face_cropped(img):
-                    gray=cv2.cvtColor(img,cv2.COLOR_BGR2BGRA)
-                    face=face_classifire.detectMultiScale(gray,1.3,5)
-                    #scling factor=1.3
-                    #Minimum neighbor=5
+                    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                    faces = face_classifier.detectMultiScale(gray, 1.3, 5)
+                    for (x, y, w, h) in faces:
+                          return img[y:y+h, x:x+w]  # Return the cropped face
+                    return None  # ✅ Return None if no face is found
 
-                    for (x,y,w,h) in face:
-                        face_cropped=img[y:y+h,x:x+w]
-                        return face_cropped
-                    return None
-                
-                cap=cv2.VideoCapture(0)  # Open the webcam
+                cap = cv2.VideoCapture(0)
                 img_id = 0
                 while True:
-                    ret, frame = cap.read()  # Read a frame from the webcam
-                    if face_cropped(frame) is not None:
-                        img_id+=1
-                    face=cv2.resize(face_cropped(frame),(450,450))
-                    face=cv2.cvtColor(face,cv2.COLOR_BGR2GRAY)
-                    file_name_path = "data/user." + str(id) + "." + str(img_id) + ".jpg"
-                    cv2.imwrite(file_name_path, face)
-                    cv2.putText(face, str(img_id), (50, 50), cv2.FONT_HERSHEY_COMPLEX, 2, (0, 255, 0), 2)
-                    cv2.imshow("Cropped Face", face)
-
-                    if cv2.waitKey(1) == 13 or int(img_id) == 100:  # Press Enter to stop capturing
+                    ret, my_frame = cap.read()
+                    if not ret:
+                        print("[ERROR] Could not read from webcam.")
                         break
-                cap.release()  # Release the webcam
-                cv2.destroyAllWindows()
-                messagebox.showinfo("Result","Genereting data set completed !! ")
-            except Exception as e:
-                messagebox.showerror("Error", f"Error due to {str(e)}", parent=self.root)
 
+                    cropped_face = face_cropped(my_frame)  # ✅ Call once and store result
+                    if cropped_face is not None:
+                        img_id += 1
+                        face = cv2.resize(cropped_face, (500, 500))  # ✅ Safe: only runs if face exists
+                        face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
+
+                        file_name_path = "data/user." + str(id) + "." + str(img_id) + ".jpg"
+                        cv2.imwrite(file_name_path, face)
+
+                        cv2.putText(face, str(img_id), (20, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+                        cv2.imshow("Cropped Face", face)
+
+                    if cv2.waitKey(1) == 13 or img_id == 100:  # Press Enter to exit
+                        break
+
+                cap.release()
+                cv2.destroyAllWindows()
+                messagebox.showinfo("Result", "Generating data sets completed!!!")
+
+            except Exception as e:
+                messagebox.showerror("Error", f"Error due to {str(e)}", parent=self.root)        
 
 if __name__ == "__main__":
     root = Tk()

@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 import mysql.connector
+from time import strftime
+from datetime import datetime
 import cv2
 import os
 import numpy as np
@@ -27,6 +29,21 @@ class Face_Recognition:
         button_recognize = Button(f_lbl, text="Start Face Recognition", cursor="hand2", font=("times new roman", 20, "bold"), bg="black", fg="white",command=self.recognize_faces)
         button_recognize.place(x=600, y=650, width=300, height=40)
 
+    #attendence function
+    def mark_attendance(self, i, r, n, d):
+        with open("attendence.csv", "r+", newline="\n") as f:
+            myDataList = f.readlines()
+            name_list = []
+            for line in myDataList:
+                entry = line.split((","))
+                name_list.append(entry[0])
+
+            if ((i not in name_list) and (r not in name_list) and (n not in name_list) and (d not in name_list)):
+                now = datetime.now()
+                d1 = now.strftime("%d/%m/%Y")
+                dtString = now.strftime("%H:%M:%S")
+                f.writelines(f"\n{i},{r},{n},{d},{dtString},{d1},Present")    
+
 
     #face recognition function
     def recognize_faces(self):
@@ -46,20 +63,40 @@ class Face_Recognition:
 
                 my_cursor.execute("select student_name from student_info where Student_id ="+ str(id))
                 n= my_cursor.fetchone() 
-                n = "+".join(n)
+                if isinstance(n, (list, tuple)):
+                    n = "+".join(str(x) for x in n)
+                else:
+                    n = str(n)
 
                 my_cursor.execute("select roll_no from student_info where Student_id ="+ str(id))
                 r= my_cursor.fetchone()
-                r = "+".join(r)
+                if isinstance(r, (list, tuple)):
+                    r = "+".join(str(x) for x in r)
+                else:
+                    r = str(r)
+
 
                 my_cursor.execute("select department from student_info where Student_id ="+ str(id))
                 d= my_cursor.fetchone()
-                d = "+".join(d)
+                if isinstance(d, (list, tuple)):
+                    d = "+".join(str(x) for x in d)
+                else:
+                   d = str(d)
+
+
+                my_cursor.execute("select student_id from student_info where Student_id ="+ str(id))
+                i= my_cursor.fetchone()
+                if isinstance(i, (list, tuple)):
+                    i = "+".join(str(x) for x in i)
+                else:
+                    i = str(i)    
 
                 if confidence > 77:
-                    cv2.putText(img, f"Name: {n}", (x, y - 55), cv2.FONT_HERSHEY_COMPLEX, 0.8, (255, 255, 255), 3)
-                    cv2.putText(img, f"Roll No: {r}", (x, y - 30), cv2.FONT_HERSHEY_COMPLEX, 0.8, (255, 255, 255), 3)
+                    cv2.putText(img, f"ID: {i}", (x, y - 75), cv2.FONT_HERSHEY_COMPLEX, 0.8, (255, 255, 255), 3)
+                    cv2.putText(img, f"Roll No: {r}", (x, y - 55), cv2.FONT_HERSHEY_COMPLEX, 0.8, (255, 255, 255), 3)
+                    cv2.putText(img, f"Name: {n}", (x, y - 30), cv2.FONT_HERSHEY_COMPLEX, 0.8, (255, 255, 255), 3)
                     cv2.putText(img, f"Department: {d}", (x, y - 5), cv2.FONT_HERSHEY_COMPLEX, 0.8, (255, 255, 255), 3)
+                    self.mark_attendance(i, r, n, d)
                 else:
                     cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 3)
                     cv2.putText(img, "Unknown Face", (x, y - 5), cv2.FONT_HERSHEY_COMPLEX, 0.8, (255, 255, 255), 3)
@@ -72,7 +109,7 @@ class Face_Recognition:
             coords = draw_boundary(img, faceCascade, 1.1, 10, (255, 25, 255), "Face", clf)
             return img         
                     
-        faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+        faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
         clf = cv2.face.LBPHFaceRecognizer_create()
         clf.read("classifier.xml")
 
@@ -101,3 +138,6 @@ if __name__ == "__main__":
     root = Tk()
     obj = Face_Recognition(root)
     root.mainloop()
+
+
+
